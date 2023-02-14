@@ -1,0 +1,17 @@
+name: BedWars
+version: '${project.version}'
+main: kalle.com.bedwars.BedWars
+api-version: 1.13
+commands:
+  setteamsize:
+    usage: /setteamsize <Team Name> <Team Size>
+    description: Sets the Size of the Team with passed Team Name.
+  setteamspawn:
+    usage: /setteamspawn <Team Name>
+    description: Sets the Spawn of the Team with passed Team Name to the executors current location.
+  setteambed:
+    usage: /setteambed <Team Name>
+    description: Sets the Spawn of the Team Bed with passed Team Name to the executors current location.
+  test:
+    usage: /test
+    description: Command for testing purposes.
