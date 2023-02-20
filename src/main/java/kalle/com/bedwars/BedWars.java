@@ -1,22 +1,34 @@
 package kalle.com.bedwars;
 
-import jdk.incubator.vector.VectorOperators;
-import kalle.com.bedwars.commands.*;
 import kalle.com.bedwars.configurations.SettingsConfiguration;
 import kalle.com.bedwars.configurations.TeamsConfiguration;
+import kalle.com.bedwars.modes.Game;
+import kalle.com.bedwars.modes.Lobby;
+import kalle.com.bedwars.modes.Mode;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.List;
 
 public final class BedWars extends JavaPlugin {
 
     public static String PluginTag = ChatColor.DARK_PURPLE + "[BedWars] " + ChatColor.RESET;
 
+    private static Game game;
+    private static Lobby lobby;
+
+    private static Mode mode;
+
     @Override
     public void onEnable() {
         // Plugin startup logic
-        registerCommands();
-        registerEvents();
         setupConfigurations();
+        List<Team> teams = TeamsConfiguration.getTeams();
+        game = new Game(SettingsConfiguration.getGameWorld(), teams);
+        lobby = new Lobby(SettingsConfiguration.getLobbySpawn(), SettingsConfiguration.getMinPlayers(), teams);
+        registerEvents();
+        registerCommands();
+        if (SettingsConfiguration.isReady()) mode = lobby;
         getServer().getConsoleSender().sendMessage(PluginTag + ChatColor.GREEN + "Plugin has been enabled.");
     }
 
@@ -26,26 +38,35 @@ public final class BedWars extends JavaPlugin {
         getServer().getConsoleSender().sendMessage(PluginTag + ChatColor.RED + "Plugin has been disabled.");
     }
 
-    private void registerCommands() {
-        getCommand("setteamsize").setExecutor(new SetTeamSizeCommand());
-        getCommand("setteamspawn").setExecutor(new SetTeamSpawnCommand());
-        getCommand("setteambed").setExecutor(new SetTeamBedCommand());
-        getCommand("test").setExecutor(new TestCommand());
-    }
-
-    private void registerEvents() {
-
-    }
-
     private void setupConfigurations() {
         if (!getDataFolder().exists()) {
             getDataFolder().mkdir();
         }
-        SettingsConfiguration settings = new SettingsConfiguration(this);
-        settings.setup();
-        TeamsConfiguration teams = new TeamsConfiguration(this);
-        teams.setup();
+        TeamsConfiguration teamsConfig = new TeamsConfiguration(this);
+        teamsConfig.setup();
+        SettingsConfiguration settingsConfig = new SettingsConfiguration(this);
+        settingsConfig.setup();
     }
 
+    private void registerEvents() {
+        getServer().getPluginManager().registerEvents(game,this);
+        getServer().getPluginManager().registerEvents(lobby,this);
+    }
+
+    private void registerCommands() {
+
+    }
+
+    public static Mode getMode() {
+        return mode;
+    }
+
+    public static Game getGame() {
+        return game;
+    }
+
+    public static Lobby getLobby() {
+        return lobby;
+    }
 
 }

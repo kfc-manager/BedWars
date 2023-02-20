@@ -1,6 +1,8 @@
 package kalle.com.bedwars;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -9,69 +11,53 @@ import java.util.List;
 public class Team {
 
     private List<Player> players = new ArrayList<>();
-    private MyColor color;
     private String name;
-    private double spawn[];
+    private ChatColor color;
     private int size;
+    private int[] playerSpawn;
+    private int[] bedLocation;
+    private BlockFace bedDirection;
+    private Material bedMaterial;
 
-    private TeamBed bed;
-
-    private boolean respawn = true;
-
-    public Team(MyColor color, int size,
-                double playerX, double playerY, double playerZ, double yaw,
-                double bedX, double bedY, double bedZ, String bedDirection) throws IllegalArgumentException {
-        this.color = color;
-        this.name = buildName(color);
+    public Team(String color, int size, int[] playerSpawn, int[] bedLocation, String bedDirection)
+            throws IllegalArgumentException, NullPointerException {
+        if (size < 1 || playerSpawn.length != 4 || bedLocation.length != 3) {
+            throw new IllegalArgumentException();
+        }
+        this.name = color;
+        this.color = ChatColor.valueOf(color);
         this.size = size;
-        this.spawn = new double[]{playerX, playerY, playerZ, yaw};
-        this.bed = new TeamBed(color, bedX, bedY, bedZ, bedDirection);
+        this.playerSpawn = playerSpawn;
+        this.bedLocation = bedLocation;
+        this.bedDirection = BlockFace.valueOf(bedDirection);
+        this.bedMaterial = Material.valueOf(color + "_BED");
     }
 
-    private String buildName(MyColor color) {
-        String colorString = color.toString();
-        String name = "";
-        for (int i = 0; i < colorString.length(); i++) {
-            if (colorString.charAt(i) == 95) {
-                name += " ";
-            } else {
-                name += colorString.charAt(i);
-            }
-        }
-        return name;
-    }
-
-    public void addPlayer(Player player) throws IndexOutOfBoundsException, IllegalArgumentException {
-        if (players.size() == size) {
-            throw new IndexOutOfBoundsException("Team is already full.");
-        }
-        if (players.contains(player)) {
-            throw new IllegalArgumentException("Player already joined the Team.");
+    public void addPlayer(Player player) throws IndexOutOfBoundsException {
+        if (size < players.size() + 1) {
+            throw new IndexOutOfBoundsException();
         }
         players.add(player);
     }
 
-    public void removePlayer(Player player) throws IllegalArgumentException {
-        if (!players.contains(player)) {
-            throw new IllegalArgumentException("Player isn't assigned to the Team.");
-        }
+    public void removePlayer(Player player) {
         players.remove(player);
     }
 
-    public List<Player> getPlayers() {
-        return players;
+    public List<String> getPlayerList() {
+        List<String> list = new ArrayList<>();
+        for (Player player : players) {
+            list.add(color + player.getDisplayName());
+        }
+        return list;
     }
 
-    public double[] getSpawn() {
-        return spawn;
+    public int getSize() {
+        return size;
     }
 
-    public MyColor getColor() {
-        return color;
-    }
-
-    public String getName() {
-        return name;
+    public boolean contains(Player player) {
+        return players.contains(player);
     }
 
 }
